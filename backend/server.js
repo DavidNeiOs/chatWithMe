@@ -1,3 +1,4 @@
+// DEPENDANCIES
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -10,8 +11,9 @@ const cors = require('cors');
 const io = socketIO(server);
 
 app.use(cors(), bodyParser.raw({ type: '*/*'}));
-// MONGO DB URL
+// CONSTANTS
 const MongoUrl = 'mongodb://admin:password1@ds119442.mlab.com:19442/my-database'
+const COOKIE_NAME = 'chatID';
 
 //SERVER STATE
     let state = {
@@ -42,6 +44,10 @@ app.post('/signup', (req, res) => {
                 dbo.collection('users').insertOne(body, (err, result) => {
                     if (err) throw err;
                     // console.log(result.ops[0].username); get username when success
+
+                    // RESPOND AND SET COOKIE
+                    let token = Math.floor(Math.random() * 100000) + '';
+                    res.cookie(COOKIE_NAME, token);
                     res.send(JSON.stringify({success: true, message: 'user added', username: result.ops[0].username}));
                     db.close();
                 })
@@ -51,7 +57,7 @@ app.post('/signup', (req, res) => {
         
     })
 
-    // RESPOND AND SET COOKIE
+    
     
 })
 

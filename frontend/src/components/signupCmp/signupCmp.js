@@ -46,6 +46,8 @@ class SignupComponent extends Component {
       // SEND INFORMATION TO SERVER
       fetch('/signup', {
         method: 'POST',
+        mode: 'same-origin',
+        credentials: 'include',
         body: JSON.stringify(currentState)
       })
         .then(response => response.text())
@@ -60,7 +62,7 @@ class SignupComponent extends Component {
   }
 
   handleChange(evt) {
-    console.log(evt);
+    //console.log(evt);
     let change = Object.assign({}, this.state.form, {[evt.target.name]: evt.target.value});
     this.setState({form: change, formCompleted: this.isCompleted()});
   }
