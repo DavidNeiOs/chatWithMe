@@ -6,6 +6,9 @@ import SignupComponent from './components/signupCmp/signupCmp';
 import LoginCmp from './components/loginCmp/loginCmp';
 import ChatCmp from './components/chatCmp/chatCmp'
 
+let renderChatComponent = function(routerData) {
+return (<ChatCmp username={routerData.match.params.username} />)
+}
 
 class App extends Component {
   
@@ -17,6 +20,7 @@ class App extends Component {
           <Route path="/signup" component={SignupComponent}></Route>
           <Route path="/login" component={LoginCmp}></Route>
           <Route path="/chat" component={ChatCmp}></Route>
+          <Route path="/user/:username" render={renderChatComponent}></Route>
         </div>
       </BrowserRouter>
     );

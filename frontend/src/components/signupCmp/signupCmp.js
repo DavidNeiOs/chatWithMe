@@ -1,5 +1,7 @@
 import React, { Component } from "react";
+import { withRouter } from 'react-router-dom';
 import './signupcmp.css';
+
 class SignupComponent extends Component {
   constructor() {
     super();
@@ -53,7 +55,14 @@ class SignupComponent extends Component {
         .then(response => response.text())
         .then(responseBody => {
           let result = JSON.parse(responseBody);
-          console.log(result);
+          if(result.success) {
+            this.props.history.push('/user/' + result.username);
+            console.log(result);
+          } else {
+            let correctUN = Object.assign({}, this.state.form, {username: ''});
+            this.setState({form : correctUN});
+            alert(result.message);
+          }
         })
         .catch(err => {
           console.log(err);
@@ -136,4 +145,6 @@ class SignupComponent extends Component {
   }
 }
 
-export default SignupComponent;
+let SignupComponentWithRouter = withRouter(SignupComponent);
+
+export default SignupComponentWithRouter;

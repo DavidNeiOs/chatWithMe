@@ -4,8 +4,8 @@ import socketIO from "socket.io-client";
 
 class ChatCmp extends Component {
   
-  constructor() {
-      super();
+  constructor(props) {
+      super(props);
       this.state = {
           form: {
               message: ''
@@ -16,22 +16,38 @@ class ChatCmp extends Component {
       this.handleChange = this.handleChange.bind(this);
       this.renderMessages = this.renderMessages.bind(this);
   }
-  
+
   componentDidMount() {
-
+    let newMsgs = [];
+    // MAKE CONNECTION TO THE SERVER AND JOIN THE ROOM
     this.socket = socketIO("http://localhost:4000");
+    this.socket.emit('room', this.props.username);
+    // CAPTURE CHAT MESSAGES AND ADDED TO PAGE
     this.socket.on('chat message', msg => {
-        let newMsgs = this.state.messages.slice();
-        newMsgs.push(msg);
-        this.setState({messages: newMsgs});
-    })
+      newMsgs.push(msg);
+      this.setState({messages : newMsgs})
+    }) 
 
+    // WHEN CHAT IS LOADED IT WILL GO FIND ALL MESSAGES
+    fetch('/getMessages', {
+      method: 'POST',
+      body: JSON.stringify({room: this.props.username})
+    })
+      .then(response => response.text())
+      .then(responseBody => {
+        let parsedResponse = JSON.parse(responseBody);
+        newMsgs = parsedResponse.messages;
+        this.setState({messages: newMsgs});
+      })   
   }
 
   handleSubmit(evt) {
 
     evt.preventDefault();
-    this.socket.emit('chat message', this.state.form.message);
+    this.socket.emit('chat message', { message: this.state.form.message, 
+      room: this.props.username, 
+      user: this.props.username
+    });
     let change = Object.assign(this.state.form, {message : ""});
     this.setState({form: change});
 
@@ -47,7 +63,7 @@ class ChatCmp extends Component {
   renderMessages(msg) {
     return (
         <li>
-            {msg}
+            {msg.user + ': ' + msg.message}
         </li>
     )
   }

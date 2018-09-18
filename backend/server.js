@@ -40,11 +40,17 @@ app.post('/signup', (req, res) => {
                 db.close();
                 return;
             } else {
+                // CREATE COLLECTION THAT WILL STORE MESSAGES
+                dbo.createCollection(body.username, function (err, res) {
+                    if (err) throw err;
+                    console.log("collection created");
+                });
+
                 // ELSE SAVE THE INFO IN DATABASE
                 dbo.collection('users').insertOne(body, (err, result) => {
                     if (err) throw err;
                     // console.log(result.ops[0].username); get username when success
-
+                    
                     // RESPOND AND SET COOKIE
                     let token = Math.floor(Math.random() * 100000) + '';
                     res.cookie(COOKIE_NAME, token);
@@ -52,24 +58,45 @@ app.post('/signup', (req, res) => {
                     db.close();
                 })
             }
-        });
+        }); 
+    })   
+})
+app.post('/getMessages', (req, res) => {
+    let messages = [];
+    // GET THE INFO FROM FRONT END
+    let room = JSON.parse(req.body).room;
+    
+    // GET THE ROOM NAME AND SEARCH IN DB
+    MongoClient.connect(MongoUrl, { useNewUrlParser: true }, function (err, db) {
+        if (err) throw err;
+        let dbo = db.db('my-database');
         
-        
+        dbo.collection(room).find({}).toArray(function (err, result) {
+            if(err) throw err;
+            messages = result;
+            console.log(messages);
+            db.close();
+            res.send(JSON.stringify({status: true, messages}));
+        })
     })
-
+    // SEND THE MSGS BACK IN ARRAY FORM
     
     
 })
 
 //---------------------------------------------------
 //    SOCKET IO
+//---------------------------------------------------
 io.on('connection', socket => {
     console.log('connected');
-    socket.on('greet', greeting => {
-        console.log(greeting);
+    // ONCE THE CLIENT IS CONNECTED THEY CREATE THE ROOM THEY WILL JOIN
+    socket.on('room', room => {
+        socket.join(room);
+        console.log('room joined ' + room);
     })
-    socket.on('chat message', msg => {
-        io.emit('chat message', msg);
+    // 'END POINT' FOR WHEN USERS SEND CHAT MESSAGES
+    socket.on('chat message', msgObject => {
+        /*io.emit('chat message', msg);
         console.log('message: ' + msg);
         MongoClient.connect(MongoUrl, { useNewUrlParser: true }, (err, db) => {
             if (err) throw err;
@@ -79,6 +106,19 @@ io.on('connection', socket => {
                 console.log('message saved');
                 db.close();
             })
+        })*/
+        let message = {user: msgObject.user, message: msgObject.message}
+        io.in(msgObject.room).emit('chat message', message);
+        MongoClient.connect(MongoUrl, { useNewUrlParser: true }, (err, db) => {
+            if (err) throw err;
+            let dbo = db.db('my-database');
+            dbo.collection(msgObject.room).insertOne({ user: msgObject.user, message: msgObject.message },
+                (err, res) => {
+                    if (err) throw err;
+                    console.log('message saved');
+                    db.close();
+                }
+            )
         })
     })
     socket.on('disconnect', () => {
