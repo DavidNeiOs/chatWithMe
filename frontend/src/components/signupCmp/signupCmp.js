@@ -59,6 +59,7 @@ class SignupComponent extends Component {
             this.props.history.push('/user/' + result.username);
             console.log(result);
           } else {
+            // if username already exists
             let correctUN = Object.assign({}, this.state.form, {username: ''});
             this.setState({form : correctUN});
             alert(result.message);

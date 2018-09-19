@@ -15,13 +15,47 @@ app.use(cors(), bodyParser.raw({ type: '*/*'}));
 const MongoUrl = 'mongodb://admin:password1@ds119442.mlab.com:19442/my-database'
 const COOKIE_NAME = 'chatID';
 
-//SERVER STATE
-    let state = {
-        messages : [],
+//----------------------------------------------------
+//                  FUNCTIONS
+//----------------------------------------------------
+function getSession(req) {
+    try {
+        console.log(req.headers)
+        let session = req.headers.cookie != undefined ? req.headers.cookie.split('=')[1].split(';')[0] : '';
+        return session;
     }
+    catch (err) {
+        console.log('error getting cookie');
+    }
+}
 //----------------------------------------------------
 //                  END POINTS
 //----------------------------------------------------
+app.get('/session', (req, res) => {
+    // GET INFO FROM FRONT END
+    let currentSession = getSession(req);
+    console.log('session: ' + currentSession);
+    // CALL GETSESSION TO GET THE ID
+    if(currentSession) {
+        MongoClient.connect(MongoUrl, { useNewUrlParser: true }, (err, db) => {
+            if (err) throw err;
+            let dbo = db.db('my-database');
+    
+            //FIND IF SESSION IS ACTIVE
+            dbo.collection('sessions').findOne({token: currentSession}, (err, result) => {
+                if (err) throw err;
+                if(result) {
+                    res.send(JSON.stringify({success: true, result}));
+                }
+            });
+        });
+    } else {
+        res.send(JSON.stringify({success: false}))
+    }
+    
+    // SEND BACK IF USER HAS AN ACTIVE SESSION OR NOT
+})
+
 app.post('/signup', (req, res) => {
     // GET THE INFO FROM FRONT END
     let body = JSON.parse(req.body.toString());
@@ -51,8 +85,13 @@ app.post('/signup', (req, res) => {
                     if (err) throw err;
                     // console.log(result.ops[0].username); get username when success
                     
-                    // RESPOND AND SET COOKIE
+                    // CREATE COOKIE
                     let token = Math.floor(Math.random() * 100000) + '';
+                    // SAVE SESSION IN DB
+                    dbo.collection('sessions').insertOne({token, username: result.ops[0].username}, (err, result)=>{
+                        if (err) throw err;
+                        console.log('session added');
+                    })
                     res.cookie(COOKIE_NAME, token);
                     res.send(JSON.stringify({success: true, message: 'user added', username: result.ops[0].username}));
                     db.close();
@@ -76,12 +115,10 @@ app.post('/getMessages', (req, res) => {
             messages = result;
             console.log(messages);
             db.close();
+            // SEND THE MSGS BACK IN ARRAY FORM
             res.send(JSON.stringify({status: true, messages}));
         })
     })
-    // SEND THE MSGS BACK IN ARRAY FORM
-    
-    
 })
 
 //---------------------------------------------------
