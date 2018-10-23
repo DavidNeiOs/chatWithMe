@@ -80,7 +80,7 @@ app.post('/signup', (req, res) => {
                     console.log("collection created");
                 });
 
-                // ELSE SAVE THE INFO IN DATABASE
+                // SAVE THE INFO IN DATABASE
                 dbo.collection('users').insertOne(body, (err, result) => {
                     if (err) throw err;
                     // console.log(result.ops[0].username); get username when success
@@ -99,6 +99,29 @@ app.post('/signup', (req, res) => {
             }
         }); 
     })   
+})
+
+app.post('/login', (req, res) => {
+    // GET THE INFO FROM FRONT-END
+    let body = JSON.parse(req.body.toString());
+    console.log(body);
+    let messages = [];
+    MongoClient.connect(MongoUrl, { useNewUrlParser: true }, function(err, db) {
+        if (err) throw err;
+        let dbo = db.db('my-database');
+        // CHECK IF THE USER EXISTS
+        dbo.collection(room).find({}).toArray(function(err, result) {
+            if (err) throw err;
+            messages = result;
+            console.log(messages);
+            db.close();
+
+            // USER EXISTS WE SEND BACK MESSAGES
+            res.send(JSON.stringify({status: true, messages}));
+        })
+
+    })
+    // CREATE COOKIE AND SEND BACK RESPONSE
 })
 app.post('/getMessages', (req, res) => {
     let messages = [];

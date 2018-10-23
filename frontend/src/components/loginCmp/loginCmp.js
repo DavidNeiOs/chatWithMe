@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import './loginCmp.css';
 
 class LoginCmp extends Component {
@@ -30,6 +31,20 @@ class LoginCmp extends Component {
     handleSubmit(evt) {
         evt.preventDefault();
         console.log(this.state);
+        if(this.state.formCompleted){
+            const form = Object.assign({}, this.state.form);
+
+            fetch('.login', {
+                method: 'POST',
+                mode: 'same-origin',
+                credentials: 'include',
+                body: JSON.stringify(form)
+            })
+              .then(response => response.text())
+              .then(responseBody => {
+                  console.log(responseBody);
+              })
+        }
     }
     render () {
         return (
@@ -69,4 +84,4 @@ class LoginCmp extends Component {
     }
 }
 
-export default LoginCmp;
+export default withRouter(LoginCmp);

@@ -58,5 +58,5 @@ class HomepageComponent extends Component {
     }
 }
 
-let homepageComponentWithRouter = withRouter(HomepageComponent)
-export default homepageComponentWithRouter;
+
+export default withRouter(HomepageComponent);
