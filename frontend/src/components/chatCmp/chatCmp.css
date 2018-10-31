@@ -33,35 +33,30 @@
 }
 #messages {
   list-style-type: none;
-  position: relative;
   margin: 0;
   padding: 0;
   height: 95%;
   width: 100%;
   overflow-y: scroll;
+  display: flex;
+  flex-direction: column-reverse;
 }
 #messages::-webkit-scrollbar {
   visibility: hidden;
 }
 .green {
   background-color: #8beebd;
-  padding: 5px 10px;
-  width: 30%;
+  padding: 10px;
+  min-width: 30%;
+  max-width: 60%;
   margin: 1vh 1vh 1vh 0;
-  float: right;
-  clear: both;
-  right: 0;
-  padding: 1vh;
   border-radius: 0.5rem;
+  align-self: flex-end;
 }
 .yellow {
   background-color: #eaf8a9;
-  padding: 5px 10px;
+  padding: 10px;
   width: 30%;
   margin: 1vh 1vh 1vh 0;
-  float: left;
-  clear: both;
-  right: 0;
-  padding: 1vh;
   border-radius: 0.5rem;
 }

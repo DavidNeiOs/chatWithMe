@@ -21,11 +21,6 @@ class ChatCmp extends Component {
     // MAKE CONNECTION TO THE SERVER AND JOIN THE ROOM
     this.socket = socketIO("http://localhost:4000");
     this.socket.emit("room", this.props.username);
-    // CAPTURE CHAT MESSAGES AND ADDED TO PAGE
-    this.socket.on("chat message", msg => {
-      newMsgs.push(msg);
-      this.setState({ messages: newMsgs });
-    });
 
     // WHEN CHAT IS LOADED IT WILL GO FIND ALL MESSAGES
     fetch("/getMessages", {
@@ -36,8 +31,15 @@ class ChatCmp extends Component {
       .then(responseBody => {
         let parsedResponse = JSON.parse(responseBody);
         newMsgs = parsedResponse.messages;
-        this.setState({ messages: newMsgs });
+        this.setState({ messages: newMsgs.reverse() });
       });
+
+    // CAPTURE CHAT MESSAGES AND ADDED TO PAGE
+    this.socket.on("chat message", msg => {
+      newMsgs.unshift(msg);
+      // console.log(newMsgs);
+      this.setState({ messages: newMsgs });
+    });
   }
 
   handleSubmit(evt) {
@@ -58,20 +60,25 @@ class ChatCmp extends Component {
     this.setState({ form: change });
   }
 
-  renderMessages(msg) {
-    return <li className={msg.user === this.props.username ? 'green' : 'yellow'}>
-        {msg.message}
-      </li>;
+  renderMessages(msg, index) {
+    return (
+      <div 
+        className={msg.user === this.props.username ? 'green' : 'yellow'} 
+        key={index}
+      >
+        <span>{msg.message}</span>
+      </div>
+    );
   }
   render() {
     return (
       <div className="background">
         <div className="chat-container">
-          <ul id="messages">
-            {this.state.messages.map(msg => {
-              return this.renderMessages(msg);
+          <div id="messages">
+            {this.state.messages.map((msg, idx) => {
+              return this.renderMessages(msg, idx);
             })}
-          </ul>
+          </div>
           <form onSubmit={this.handleSubmit} className="chat-form">
             <input
               id="m"
@@ -81,7 +88,7 @@ class ChatCmp extends Component {
               onChange={this.handleChange}
               value={this.state.form.message}
             />
-            <input type="submit" className="chat-form__button" />
+            <input type="submit" className="chat-form__button" value="send" />
           </form>
         </div>
       </div>

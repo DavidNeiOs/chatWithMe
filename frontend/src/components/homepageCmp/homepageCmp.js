@@ -9,9 +9,6 @@ class HomepageComponent extends Component {
       activeSession: 0
     };
   }
-  loadChat() {
-    // PUSH THE USERNAME TO THE URL SO CHAT IS RENDERED
-  }
   componentDidMount() {
     // FETCH THE INFO FROM SERVER
     fetch("/session", {
@@ -30,42 +27,28 @@ class HomepageComponent extends Component {
         } else {
           this.setState({ activeSession: 1 });
         }
+      })
+      .catch(err => {
+        alert("there was an error in server");
       });
   }
   render() {
-    return !this.state.activeSession ? (
-      <div className="btns">
-        <h2 className="loading">LOADING</h2>
-      </div>
-    ) : (
-      <div className="btns">
-        <Link className="signup-btn" to="/signup">
-          SIGN UP
-        </Link>
-        <Link className="login-btn" to="/login">
-          LOG IN
-        </Link>
-      </div>
-    );
-    // if (this.state.activeSession === 0) {
-    //   return (
-    //     // before checking the cookie
-    //     <div className="btns">
-    //       <h2 className="loading">LOADING</h2>
-    //     </div>
-    //   );
-    // } else if (this.state.activeSession === 1) {
-    //   return (
-    //     <div className="btns">
-    //       <Link className="signup-btn" to="/signup">
-    //         SIGN UP
-    //       </Link>
-    //       <Link className="login-btn" to="/login">
-    //         LOG IN
-    //       </Link>
-    //     </div>
-    //   );
-    // }
+    return !this.state.activeSession 
+    ? (
+        <div className="btns">
+          <h2 className="loading">LOADING</h2>
+        </div>
+      ) 
+    : (
+        <div className="btns">
+          <Link className="signup-btn" to="/signup">
+            SIGN UP
+          </Link>
+          <Link className="login-btn" to="/login">
+            LOG IN
+          </Link>
+        </div>
+      );
   }
 }
 

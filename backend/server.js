@@ -34,11 +34,13 @@ function getSession(req) {
 //----------------------------------------------------
 //                  END POINTS
 //----------------------------------------------------
+
+// *** On page load ***
 app.get("/session", (req, res) => {
-  // GET INFO FROM FRONT END
+  // Get info from front-end
   let currentSession = getSession(req);
   console.log("session: " + currentSession);
-  // CALL GETSESSION TO GET THE ID
+  // Call getSession to get the ID
   if (currentSession) {
     MongoClient.connect(
       MongoUrl,
@@ -47,7 +49,7 @@ app.get("/session", (req, res) => {
         if (err) throw err;
         let dbo = db.db("my-database");
 
-        //FIND IF SESSION IS ACTIVE
+        //Find if session is active
         dbo
           .collection("sessions")
           .findOne({ token: currentSession }, (err, result) => {
@@ -65,14 +67,15 @@ app.get("/session", (req, res) => {
     res.send(JSON.stringify({ success: false }));
   }
 
-  // SEND BACK IF USER HAS AN ACTIVE SESSION OR NOT
+  // Send back if user has an active session or not
 });
 
+// *** When an user wants to sign up ***
 app.post("/signup", (req, res) => {
-  // GET THE INFO FROM FRONT END
+  // Get info from front end
   let body = JSON.parse(req.body.toString());
 
-  // CHECK THAT THE USER DOESN'T EXIST ALREADY
+  // Check that user does not exist already
   MongoClient.connect(
     MongoUrl,
     { useNewUrlParser: true },
@@ -80,12 +83,11 @@ app.post("/signup", (req, res) => {
       if (err) throw err;
       let dbo = db.db("my-database");
 
-      // IF USER EXISTS SEND ERROR
       dbo
         .collection("users")
         .findOne({ username: body.username }, function(err, result) {
           if (err) throw err;
-
+          // If user exists send succes false
           if (result) {
             res.send(
               JSON.stringify({ success: false, message: "user already exists" })
@@ -93,20 +95,20 @@ app.post("/signup", (req, res) => {
             db.close();
             return;
           } else {
-            // CREATE COLLECTION THAT WILL STORE MESSAGES
+            // Create collection that will store messages
             dbo.createCollection(body.username, function(err, res) {
               if (err) throw err;
               console.log("collection created");
             });
 
-            // ELSE SAVE THE INFO IN DATABASE
+            // Save the info in database
             dbo.collection("users").insertOne(body, (err, result) => {
               if (err) throw err;
               // console.log(result.ops[0].username); get username when success
 
-              // CREATE COOKIE
+              // Create cookie
               let token = Math.floor(Math.random() * 100000) + "";
-              // SAVE SESSION IN DB
+              // Save session in DB
               dbo
                 .collection("sessions")
                 .insertOne(
@@ -131,12 +133,66 @@ app.post("/signup", (req, res) => {
     }
   );
 });
+// *** When user wants to log in ***
+app.post('/login', (req, res) => {
+  // Get info from front end
+  let body = JSON.parse(req.body.toString());
+
+  // Find user in database
+  MongoClient.connect(
+    MongoUrl,
+    { useNewUrlParser: true },
+    (err, db) => {
+      if (err) throw err;
+      
+      let dbo = db.db('my-database');
+
+      dbo
+        .collection('users')
+        .findOne({username: body.username, password: body.password},
+          (err, result) => {
+            if(err) throw err;
+            // if user does not exist send send success false
+            if(!result) {
+              db.close();
+              res.send({success: false});
+            } else {
+              // if user exists set cookie and send success true and info back
+              console.log(result);
+              // Create cookie
+              let token = Math.floor(Math.random() * 100000) + "";
+              // Save session in DB
+              dbo
+                .collection("sessions")
+                .insertOne(
+                  { token, username: result.username },
+                  (err, result) => {
+                    if (err) throw err;
+                    console.log("session added");
+                  }
+                );
+              db.close();
+              res.cookie(COOKIE_NAME, token);
+              res.send(JSON.stringify({
+                success: true, 
+                username: result.username
+              }));
+            } 
+          }
+        )
+
+    }
+  )
+  
+  
+});
+// *** when chat component is loaded it will get messages ***
 app.post("/getMessages", (req, res) => {
   let messages = [];
-  // GET THE INFO FROM FRONT END
+  // Get info from fron end
   let room = JSON.parse(req.body).room;
 
-  // GET THE ROOM NAME AND SEARCH IN DB
+  // Get the room name and search in DB
   MongoClient.connect(
     MongoUrl,
     { useNewUrlParser: true },
@@ -152,7 +208,7 @@ app.post("/getMessages", (req, res) => {
           messages = result;
           console.log(messages);
           db.close();
-          // SEND THE MSGS BACK IN ARRAY FORM
+          // Send the messages back in array form
           res.send(JSON.stringify({ status: true, messages }));
         });
     }
@@ -171,19 +227,11 @@ io.on("connection", socket => {
   });
   // 'END POINT' FOR WHEN USERS SEND CHAT MESSAGES
   socket.on("chat message", msgObject => {
-    /*io.emit('chat message', msg);
-        console.log('message: ' + msg);
-        MongoClient.connect(MongoUrl, { useNewUrlParser: true }, (err, db) => {
-            if (err) throw err;
-            let dbo = db.db('my-database');
-            dbo.collection('messages').insertOne({ message: msg }, (err, res) => {
-                if (err) throw err;
-                console.log('message saved');
-                db.close();
-            })
-        })*/
+    // Receive message and store it in an object
     let message = { user: msgObject.user, message: msgObject.message };
+    // Emit the message
     io.in(msgObject.room).emit("chat message", message);
+    // Store the message in database
     MongoClient.connect(
       MongoUrl,
       { useNewUrlParser: true },

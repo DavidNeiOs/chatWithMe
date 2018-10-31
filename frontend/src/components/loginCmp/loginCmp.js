@@ -34,7 +34,7 @@ class LoginCmp extends Component {
         if(this.state.formCompleted){
             const form = Object.assign({}, this.state.form);
 
-            fetch('.login', {
+            fetch('/login', {
                 method: 'POST',
                 mode: 'same-origin',
                 credentials: 'include',
@@ -42,7 +42,11 @@ class LoginCmp extends Component {
             })
               .then(response => response.text())
               .then(responseBody => {
-                  console.log(responseBody);
+                  const result = JSON.parse(responseBody);
+                  if(result.success) {
+                    this.props.history.push('/user/' + result.username);
+                    console.log(result);
+                  }
               })
         }
     }
