@@ -72,26 +72,38 @@ class ChatCmp extends Component {
   }
   render() {
     return (
-      <div className="background">
-        <div className="chat-container">
-          <div id="messages">
-            {this.state.messages.map((msg, idx) => {
-              return this.renderMessages(msg, idx);
-            })}
+      <main className="chat-cmp">
+        <header className="chat-header">
+          <div>
+            <span className="chat-header__greeting">
+              Hello {this.props.username} !
+            </span>
+            <button className="chat-header__button">
+              Log Out
+            </button>
           </div>
-          <form onSubmit={this.handleSubmit} className="chat-form">
-            <input
-              id="m"
-              autoComplete="off"
-              className="chat-form__input"
-              name="message"
-              onChange={this.handleChange}
-              value={this.state.form.message}
-            />
-            <input type="submit" className="chat-form__button" value="send" />
-          </form>
-        </div>
-      </div>
+        </header>
+        <section className="chat-background">
+          <div className="chat-container">
+            <div id="chat-messages">
+              {this.state.messages.map((msg, idx) => {
+                return this.renderMessages(msg, idx);
+              })}
+            </div>
+            <form onSubmit={this.handleSubmit} className="chat-form">
+              <input
+                id="m"
+                autoComplete="off"
+                className="chat-form__input"
+                name="message"
+                onChange={this.handleChange}
+                value={this.state.form.message}
+              />
+              <input type="submit" className="chat-form__button" value="send" />
+            </form>
+          </div>
+        </section>
+      </main>
     );
   }
 }

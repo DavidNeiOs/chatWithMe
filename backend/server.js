@@ -133,6 +133,7 @@ app.post("/signup", (req, res) => {
     }
   );
 });
+
 // *** When user wants to log in ***
 app.post('/login', (req, res) => {
   // Get info from front end
@@ -206,7 +207,7 @@ app.post("/getMessages", (req, res) => {
         .toArray(function(err, result) {
           if (err) throw err;
           messages = result;
-          console.log(messages);
+          // console.log(messages);
           db.close();
           // Send the messages back in array form
           res.send(JSON.stringify({ status: true, messages }));
