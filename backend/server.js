@@ -21,7 +21,7 @@ const COOKIE_NAME = "chatID";
 //----------------------------------------------------
 function getSession(req) {
   try {
-    console.log("headers:", req.headers);
+    // console.log("headers:", req.headers);
     let cookie = 
       req.headers.cookie != undefined
       ? req.headers.cookie.split("=")[0]

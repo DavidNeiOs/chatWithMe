@@ -1,23 +1,28 @@
 .btns {
-    position: fixed;
     width: 100%;
     height: 100%;
-    text-align: center;
-    box-sizing: border-box;
-    padding-top: 40vh;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: distribute;
+        justify-content: space-around;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    background-image: -webkit-linear-gradient(310deg, #000000 20%, #241d17);
+    background-image: -o-linear-gradient(310deg, #000000 20%, #241d17);
     background-image: linear-gradient(140deg, #000000 20%, #241d17);
 }
 .signup-btn {
     display: inline-block;
+    width: 40vw;
+    text-align: center;
     text-decoration: none;
-    width: 20vw;
-    background-color: peachpuff;
     color: black;
-    padding: 1rem;
+    background-color: peachpuff;
+    padding: 1rem 0;
     border: 1px solid salmon;
     border-radius: 0.5rem;
-    vertical-align: middle;
-    margin: 0 10vw;
 }
 .signup-btn:hover {
     opacity: 0.8;
@@ -27,14 +32,14 @@
 
 .login-btn {
     display: inline-block;
+    width: 40vw;
+    text-align: center;
     text-decoration: none;
-    width: 20vw;
     background-color: #8be7b1;
     color: black;
-    padding: 1rem;
+    padding: 1rem 0;
     border: 1px solid #78a5f8;
     border-radius: 0.5rem;
-    margin: 0 10vw;
 }
 .login-btn:hover {
     opacity: 0.8;
@@ -43,4 +48,12 @@
 }
 .loading {
     color: white;
+}
+@media (min-width: 40rem) {
+    .signup-btn {
+        width: 20vw;
+    }
+    .login-btn {
+        width: 20vw;
+    }
 }
