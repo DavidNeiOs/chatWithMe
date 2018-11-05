@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import "./chatCmp.css";
 import socketIO from "socket.io-client";
 
@@ -14,17 +15,20 @@ class ChatCmp extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.renderMessages = this.renderMessages.bind(this);
+    this.handleLogOut = this.handleLogOut.bind(this);
   }
 
   componentDidMount() {
     let newMsgs = [];
-    // MAKE CONNECTION TO THE SERVER AND JOIN THE ROOM
+    // Make a connection to server and join the room
     this.socket = socketIO("http://localhost:4000");
     this.socket.emit("room", this.props.username);
 
-    // WHEN CHAT IS LOADED IT WILL GO FIND ALL MESSAGES
+    // When chat is loaded it will go and get the messages
     fetch("/getMessages", {
       method: "POST",
+      mode: 'same-origin',
+      credentials: "include",
       body: JSON.stringify({ room: this.props.username })
     })
       .then(response => response.text())
@@ -34,14 +38,14 @@ class ChatCmp extends Component {
         this.setState({ messages: newMsgs.reverse() });
       });
 
-    // CAPTURE CHAT MESSAGES AND ADDED TO PAGE
+    // Capture chat messages and add them to the page
     this.socket.on("chat message", msg => {
       newMsgs.unshift(msg);
       // console.log(newMsgs);
       this.setState({ messages: newMsgs });
     });
   }
-
+  // *** When user presses enter or clicks on submit ***
   handleSubmit(evt) {
     evt.preventDefault();
     this.socket.emit("chat message", {
@@ -52,24 +56,44 @@ class ChatCmp extends Component {
     let change = Object.assign(this.state.form, { message: "" });
     this.setState({ form: change });
   }
-
+  // *** evrytime the users type on the form ***
   handleChange(evt) {
     let change = Object.assign(this.state.form, {
       [evt.target.name]: evt.target.value
     });
     this.setState({ form: change });
   }
+  // *** When user clicks on the logout button
+  handleLogOut() {
+    fetch("/logout", {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "include",
+      body: JSON.stringify({ username: this.props.username })
+    })
+      .then(binResponse => binResponse.text())
+      .then(stringRes => {
+        let res = JSON.parse(stringRes);
+        console.log(res);
+        if(res.success) {
+          this.socket.emit("leave", this.props.username);
+          this.props.history.push('/');
+        }
+      });
+  }
 
+  // *** this is how we render messages ***
   renderMessages(msg, index) {
     return (
-      <div 
-        className={msg.user === this.props.username ? 'green' : 'yellow'} 
+      <div
+        className={msg.user === this.props.username ? "green" : "yellow"}
         key={index}
       >
         <span>{msg.message}</span>
       </div>
     );
   }
+
   render() {
     return (
       <main className="chat-cmp">
@@ -78,7 +102,7 @@ class ChatCmp extends Component {
             <span className="chat-header__greeting">
               Hello {this.props.username} !
             </span>
-            <button className="chat-header__button">
+            <button className="chat-header__button" onClick={this.handleLogOut}>
               Log Out
             </button>
           </div>
@@ -108,4 +132,4 @@ class ChatCmp extends Component {
   }
 }
 
-export default ChatCmp;
+export default withRouter(ChatCmp);

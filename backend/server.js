@@ -21,12 +21,22 @@ const COOKIE_NAME = "chatID";
 //----------------------------------------------------
 function getSession(req) {
   try {
-    console.log(req.headers);
+    console.log("headers:", req.headers);
+    let cookie = 
+      req.headers.cookie != undefined
+      ? req.headers.cookie.split("=")[0]
+      : ""
+    ;
     let session =
       req.headers.cookie != undefined
-        ? req.headers.cookie.split("=")[1].split(";")[0]
-        : "";
-    return session;
+      ? req.headers.cookie.split("=")[1].split(";")[0]
+      : ""
+    ;
+    
+    return cookie === COOKIE_NAME
+      ? session
+      : 0
+    ;
   } catch (err) {
     console.log("error getting cookie");
   }
@@ -52,14 +62,13 @@ app.get("/session", (req, res) => {
         //Find if session is active
         dbo
           .collection("sessions")
-          .findOne({ token: currentSession }, (err, result) => {
+          .findOne({ token: currentSession, active: true }, (err, result) => {
             if (err) {
               console.log(err);
               throw err;
             }
-            if (result) {
-              res.send(JSON.stringify({ success: true, result }));
-            }
+            console.log("sessionObject: ",result);
+            res.send(JSON.stringify({ success: true, result }));
           });
       }
     );
@@ -112,7 +121,7 @@ app.post("/signup", (req, res) => {
               dbo
                 .collection("sessions")
                 .insertOne(
-                  { token, username: result.ops[0].username },
+                  { token, username: result.ops[0].username, active: true },
                   (err, result) => {
                     if (err) throw err;
                     console.log("session added");
@@ -166,7 +175,7 @@ app.post('/login', (req, res) => {
               dbo
                 .collection("sessions")
                 .insertOne(
-                  { token, username: result.username },
+                  { token, username: result.username, active: true },
                   (err, result) => {
                     if (err) throw err;
                     console.log("session added");
@@ -215,7 +224,41 @@ app.post("/getMessages", (req, res) => {
     }
   );
 });
-
+// *** When user wants to log out ***
+app.post('/logout', (req, res) => {
+  // Get info from front end
+  let params = JSON.parse(req.body.toString());
+  let session = getSession(req);
+  let query = {
+    username: params.username,
+    token: session,
+    active: true
+  }
+  let newValue = {
+    $set: { active: false }
+  }
+  // cancel the session in db
+  MongoClient.connect(
+    MongoUrl,
+    { useNewUrlParser: true },
+    function(err, db) {
+      if (err) throw err;
+      let dbo = db.db("my-database");
+      dbo.collection("sessions").updateOne(query, newValue, (err, res) => {
+        if(err) throw err;
+        db.close();
+        res.clearCookie(COOKIE_NAME);
+        res.clearCookie('io');
+        res.send(
+          JSON.stringify({
+            success: true,
+            message: 'logout complete'
+          })
+        );
+      });
+    }
+  );  
+})
 //---------------------------------------------------
 //    SOCKET IO
 //---------------------------------------------------
@@ -252,8 +295,12 @@ io.on("connection", socket => {
       }
     );
   });
-  socket.on("disconnect", () => {
-    console.log("disconnected");
+  socket.on("leave", room => {
+    socket.leave(room);
+    console.log("room left: " + room);
+  });
+  socket.on("disconnect", ()=> {
+    console.log('disconnected')
   });
 });
 
