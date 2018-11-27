@@ -20,8 +20,10 @@ class HomepageComponent extends Component {
       .then(responseBody => {
         let ans = JSON.parse(responseBody);
         // IN RESPONSE SET THE STATE OF ACTIVESESSION
-        if (ans.success) {
+        if (ans.success && ans.result.username !== 'davidneios') {
           this.props.history.push("/user/" + ans.result.username);
+        } else if (ans.success && ans.result.username === 'davidneios') {
+          this.props.history.push("/" + ans.result.username);
         } else {
           this.setState({ activeSession: 1 });
         }

@@ -43,9 +43,11 @@ class LoginCmp extends Component {
               .then(response => response.text())
               .then(responseBody => {
                   const result = JSON.parse(responseBody);
-                  if(result.success) {
+                  if(result.success && result.username !== 'davidneios') {
                     this.props.history.push('/user/' + result.username);
                     console.log(result);
+                  } else if (result.success && result.username === 'davidneios') {
+                    this.props.history.push('/' + result.username);
                   }
               })
         }
