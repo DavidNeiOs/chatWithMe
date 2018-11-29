@@ -1,0 +1,12 @@
+.chat-header {
+  height: 6vh;
+  padding: 2vh 0;
+  background-color: #d46363;
+}
+.chat-header > div {
+  width: 70%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 1vw;
+}

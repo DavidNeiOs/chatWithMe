@@ -1,6 +1,15 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
+import HeaderCmp from "../headerCmp/HeaderCmp";
 
 class AdminCmp extends Component {
+  state = {
+    users: []
+  };
+  constructor(props) {
+    super(props);
+    this.handleLogOut = this.handleLogOut.bind(this);
+  }
   componentDidMount() {
     fetch("/users", {
       method: "GET",
@@ -11,15 +20,39 @@ class AdminCmp extends Component {
       .then(res => {
         const parsedRes = JSON.parse(res);
         console.log(parsedRes);
+        this.setState({ users: parsedRes });
       });
   }
+
+  handleLogOut() {
+    fetch("/logout", {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "include",
+      body: JSON.stringify({ username: this.props.username })
+    })
+      .then(binResponse => binResponse.text())
+      .then(stringRes => {
+        let res = JSON.parse(stringRes);
+        console.log(res);
+        if (res.success) {
+          this.props.history.push("/");
+        }
+      });
+  }
+
   render() {
+    console.log(this.props.username);
     return (
       <div>
-        <p>Hola</p>
+        <HeaderCmp
+          username={this.props.username}
+          handleLogOut={this.handleLogOut}
+        />
+        <main />
       </div>
     );
   }
 }
 
-export default AdminCmp;
+export default withRouter(AdminCmp);

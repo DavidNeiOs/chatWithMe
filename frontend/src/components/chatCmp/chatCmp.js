@@ -1,7 +1,8 @@
 import React, { Component } from "react";
+import socketIO from "socket.io-client";
 import { withRouter } from "react-router-dom";
 import "./chatCmp.css";
-import socketIO from "socket.io-client";
+import HeaderCmp from "../headerCmp/HeaderCmp";
 
 class ChatCmp extends Component {
   constructor(props) {
@@ -27,7 +28,7 @@ class ChatCmp extends Component {
     // When chat is loaded it will go and get the messages
     fetch("/getMessages", {
       method: "POST",
-      mode: 'same-origin',
+      mode: "same-origin",
       credentials: "include",
       body: JSON.stringify({ room: this.props.username })
     })
@@ -63,7 +64,7 @@ class ChatCmp extends Component {
     });
     this.setState({ form: change });
   }
-  // *** When user clicks on the logout button
+  // *** When user clicks on the logout button ***
   handleLogOut() {
     fetch("/logout", {
       method: "POST",
@@ -75,9 +76,9 @@ class ChatCmp extends Component {
       .then(stringRes => {
         let res = JSON.parse(stringRes);
         console.log(res);
-        if(res.success) {
+        if (res.success) {
           this.socket.emit("leave", this.props.username);
-          this.props.history.push('/');
+          this.props.history.push("/");
         }
       });
   }
@@ -97,16 +98,10 @@ class ChatCmp extends Component {
   render() {
     return (
       <main className="chat-cmp">
-        <header className="chat-header">
-          <div>
-            <span className="chat-header__greeting">
-              Hello {this.props.username} !
-            </span>
-            <button className="chat-header__button" onClick={this.handleLogOut}>
-              Log Out
-            </button>
-          </div>
-        </header>
+        <HeaderCmp
+          username={this.props.username}
+          handleLogOut={this.handleLogOut}
+        />
         <section className="chat-background">
           <div className="chat-container">
             <div id="chat-messages">

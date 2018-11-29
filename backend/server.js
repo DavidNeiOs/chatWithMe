@@ -20,14 +20,20 @@ const COOKIE_NAME = "chatID";
 //                  FUNCTIONS
 //----------------------------------------------------
 function getSession(req) {
+  const cookies = req.headers.cookie;
+  if (!cookies) return;
   try {
     // console.log("headers:", req.headers);
-    let chatId = req.headers.cookie.split("; ")[1];
-    let cookie = req.headers.cookie != undefined ? chatId.split("=")[0] : "";
-    let session = req.headers.cookie != undefined ? chatId.split("=")[1] : "";
-    return cookie === COOKIE_NAME ? session : 0;
+    // get the starting index
+    if (cookies.indexOf(COOKIE_NAME) === -1) return 0;
+    let chatIndex = cookies.indexOf(COOKIE_NAME) + COOKIE_NAME.length + 1;
+    let session =
+      cookies != undefined &&
+      cookies.slice(chatIndex, cookies.indexOf(";", chatIndex));
+    // console.log(session, chatIndex, COOKIE_NAME);
+    return chatIndex !== -1 ? session : 0;
   } catch (err) {
-    console.log("error getting cookie");
+    console.log("error getting cookie", err);
   }
 }
 //----------------------------------------------------
@@ -232,10 +238,14 @@ app.get("/users", (req, res) => {
           .toArray((err, result) => {
             if (err) throw err;
             users = result;
-            let finalRes = result.map(user => ({
-              username: user.username,
-              name: user.firstName
-            }));
+            let finalRes = result.filter(user => {
+              if (user.username !== "davidneios") {
+                return {
+                  username: user.username,
+                  name: user.firstName
+                };
+              }
+            });
             db.close();
             // send the users back to front end
             res.send(JSON.stringify({ status: true, finalRes }));
@@ -249,6 +259,7 @@ app.get("/users", (req, res) => {
 app.post("/logout", (req, res) => {
   // Get info from front end
   let params = JSON.parse(req.body.toString());
+  console.log("params", params);
   let session = getSession(req);
   let query = {
     username: params.username,
