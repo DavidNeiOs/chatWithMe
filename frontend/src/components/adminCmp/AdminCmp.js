@@ -4,7 +4,8 @@ import HeaderCmp from "../headerCmp/HeaderCmp";
 
 class AdminCmp extends Component {
   state = {
-    users: []
+    users: [],
+    success: false
   };
   constructor(props) {
     super(props);
@@ -20,7 +21,7 @@ class AdminCmp extends Component {
       .then(res => {
         const parsedRes = JSON.parse(res);
         console.log(parsedRes);
-        this.setState({ users: parsedRes });
+        this.setState({ users: parsedRes.finalRes, success: parsedRes.status });
       });
   }
 
@@ -49,7 +50,15 @@ class AdminCmp extends Component {
           username={this.props.username}
           handleLogOut={this.handleLogOut}
         />
-        <main />
+        <main>
+          {this.state.users.map((user, idx) => (
+            <div key={idx}>
+              <span>
+                <p>{user.username}</p>
+              </span>
+            </div>
+          ))}
+        </main>
       </div>
     );
   }

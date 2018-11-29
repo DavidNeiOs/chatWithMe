@@ -238,14 +238,13 @@ app.get("/users", (req, res) => {
           .toArray((err, result) => {
             if (err) throw err;
             users = result;
-            let finalRes = result.filter(user => {
-              if (user.username !== "davidneios") {
-                return {
-                  username: user.username,
-                  name: user.firstName
-                };
-              }
-            });
+            let finalRes = result
+              .filter(user => user.username !== "davidneios")
+              .map(user => {
+                const { username, firstName } = user;
+                return { username, firstName };
+              });
+
             db.close();
             // send the users back to front end
             res.send(JSON.stringify({ status: true, finalRes }));
