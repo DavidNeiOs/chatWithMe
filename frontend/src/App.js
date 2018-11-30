@@ -4,15 +4,15 @@ import "./App.css";
 import HomepageComponent from "./components/homepageCmp/homepageCmp";
 import SignupComponent from "./components/signupCmp/signupCmp";
 import LoginCmp from "./components/loginCmp/loginCmp";
-import ChatCmp from "./components/chatCmp/chatCmp";
-import AdminCmp from "./components/adminCmp/AdminCmp";
+import AdminView from "./AdminView";
+import UserView from "./UserView";
 
-let renderChatComponent = function(routerData) {
-  return <ChatCmp username={routerData.match.params.username} />;
+let renderUserComponent = function(routerData) {
+  return <UserView username={routerData.match.params.username} />;
 };
 
 let renderAdminComponent = function(routerData) {
-  return <AdminCmp username="davidneios" />;
+  return <AdminView username="davidneios" />;
 };
 class App extends Component {
   render() {
@@ -23,7 +23,7 @@ class App extends Component {
           <Route path="/signup" component={SignupComponent} />
           <Route path="/login" component={LoginCmp} />
           <Route path="/davidneios" render={renderAdminComponent} />
-          <Route path="/user/:username" render={renderChatComponent} />
+          <Route path="/user/:username" render={renderUserComponent} />
         </div>
       </BrowserRouter>
     );

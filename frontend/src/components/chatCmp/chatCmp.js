@@ -1,8 +1,6 @@
 import React, { Component } from "react";
-import socketIO from "socket.io-client";
 import { withRouter } from "react-router-dom";
 import "./chatCmp.css";
-import HeaderCmp from "../headerCmp/HeaderCmp";
 
 class ChatCmp extends Component {
   constructor(props) {
@@ -16,14 +14,12 @@ class ChatCmp extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.renderMessages = this.renderMessages.bind(this);
-    this.handleLogOut = this.handleLogOut.bind(this);
   }
 
   componentDidMount() {
     let newMsgs = [];
-    // Make a connection to server and join the room
-    this.socket = socketIO("http://localhost:4000");
-    this.socket.emit("room", this.props.username);
+
+    this.props.socket.emit("room", this.props.username);
 
     // When chat is loaded it will go and get the messages
     fetch("/getMessages", {
@@ -40,7 +36,7 @@ class ChatCmp extends Component {
       });
 
     // Capture chat messages and add them to the page
-    this.socket.on("chat message", msg => {
+    this.props.socket.on("chat message", msg => {
       newMsgs.unshift(msg);
       // console.log(newMsgs);
       this.setState({ messages: newMsgs });
@@ -49,7 +45,7 @@ class ChatCmp extends Component {
   // *** When user presses enter or clicks on submit ***
   handleSubmit(evt) {
     evt.preventDefault();
-    this.socket.emit("chat message", {
+    this.props.socket.emit("chat message", {
       message: this.state.form.message,
       room: this.props.username,
       user: this.props.username
@@ -65,23 +61,6 @@ class ChatCmp extends Component {
     this.setState({ form: change });
   }
   // *** When user clicks on the logout button ***
-  handleLogOut() {
-    fetch("/logout", {
-      method: "POST",
-      mode: "same-origin",
-      credentials: "include",
-      body: JSON.stringify({ username: this.props.username })
-    })
-      .then(binResponse => binResponse.text())
-      .then(stringRes => {
-        let res = JSON.parse(stringRes);
-        console.log(res);
-        if (res.success) {
-          this.socket.emit("leave", this.props.username);
-          this.props.history.push("/");
-        }
-      });
-  }
 
   // *** this is how we render messages ***
   renderMessages(msg, index) {
@@ -98,10 +77,6 @@ class ChatCmp extends Component {
   render() {
     return (
       <main className="chat-cmp">
-        <HeaderCmp
-          username={this.props.username}
-          handleLogOut={this.handleLogOut}
-        />
         <section className="chat-background">
           <div className="chat-container">
             <div id="chat-messages">
