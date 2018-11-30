@@ -9,7 +9,11 @@ export default class UserView extends Component {
     return (
       <div className="user-view">
         <HeaderCmp username={this.props.username} socket={socket} />
-        <ChatCmp username={this.props.username} socket={socket} />
+        <ChatCmp
+          username={this.props.username}
+          socket={socket}
+          room={this.props.username}
+        />
       </div>
     );
   }

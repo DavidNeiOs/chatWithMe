@@ -15,18 +15,17 @@ class ChatCmp extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.renderMessages = this.renderMessages.bind(this);
   }
-
   componentDidMount() {
     let newMsgs = [];
 
-    this.props.socket.emit("room", this.props.username);
+    this.props.socket.emit("room", this.props.room);
 
     // When chat is loaded it will go and get the messages
     fetch("/getMessages", {
       method: "POST",
       mode: "same-origin",
       credentials: "include",
-      body: JSON.stringify({ room: this.props.username })
+      body: JSON.stringify({ room: this.props.room })
     })
       .then(response => response.text())
       .then(responseBody => {
@@ -47,7 +46,7 @@ class ChatCmp extends Component {
     evt.preventDefault();
     this.props.socket.emit("chat message", {
       message: this.state.form.message,
-      room: this.props.username,
+      room: this.props.room,
       user: this.props.username
     });
     let change = Object.assign(this.state.form, { message: "" });
