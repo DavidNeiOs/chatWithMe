@@ -4,7 +4,6 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const socketIO = require("socket.io");
-const sha256 = require("sha256");
 const MongoClient = require("mongodb").MongoClient;
 const bodyParser = require("body-parser");
 const cors = require("cors");

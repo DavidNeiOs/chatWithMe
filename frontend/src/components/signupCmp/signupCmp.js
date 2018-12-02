@@ -1,28 +1,28 @@
 import React, { Component } from "react";
-import { withRouter } from 'react-router-dom';
-import './signupcmp.css';
+import sha256 from "sha256";
+import { withRouter } from "react-router-dom";
+import "./signupcmp.css";
 
 class SignupComponent extends Component {
   constructor() {
     super();
     this.state = {
-        form: {
-          username: "",
-          firstName: "",
-          lastName: "",
-          password: "",
-          repeatPassword: ""    
-        },
-        formCompleted: false,
-      
+      form: {
+        username: "",
+        firstName: "",
+        lastName: "",
+        password: "",
+        repeatPassword: ""
+      },
+      formCompleted: false
     };
     this.submitForm = this.submitForm.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.isCompleted = this.isCompleted.bind(this);
   }
-  isCompleted(){
-    for(let field in this.state.form){
-      if(this.state.form[field] === ""){
+  isCompleted() {
+    for (let field in this.state.form) {
+      if (this.state.form[field] === "") {
         return false;
       }
     }
@@ -30,51 +30,57 @@ class SignupComponent extends Component {
   }
 
   submitForm(evt) {
-      // PREVENT DEFAULT BEHAIVOUR
-      evt.preventDefault();
+    // PREVENT DEFAULT BEHAIVOUR
+    evt.preventDefault();
 
-      // CHECK IF PASSWORDS ARE THE SAME
-      if (this.state.form.password !== this.state.form.repeatPassword) {
-        let correctForm = Object.assign({}, this.state.form, {password: '', repeatPassword: ''});
-        this.setState({form : correctForm});
-        alert('passwords do not match');
-        return;
-      }
+    // CHECK IF PASSWORDS ARE THE SAME
+    if (this.state.form.password !== this.state.form.repeatPassword) {
+      let correctForm = Object.assign({}, this.state.form, {
+        password: "",
+        repeatPassword: ""
+      });
+      this.setState({ form: correctForm });
+      alert("passwords do not match");
+      return;
+    }
 
-      // MAKE A COPY OF THE FORM TO SEND
-      const currentState = Object.assign({}, this.state.form);
-      delete currentState['repeatPassword'];
-      
-      // SEND INFORMATION TO SERVER
-      fetch('/signup', {
-        method: 'POST',
-        mode: 'same-origin',
-        credentials: 'include',
-        body: JSON.stringify(currentState)
+    // MAKE A COPY OF THE FORM TO SEND
+    const currentState = Object.assign({}, this.state.form);
+    delete currentState["repeatPassword"];
+    currentState.password = sha256(currentState.password);
+
+    // SEND INFORMATION TO SERVER
+    fetch("/signup", {
+      method: "POST",
+      mode: "same-origin",
+      credentials: "include",
+      body: JSON.stringify(currentState)
+    })
+      .then(response => response.text())
+      .then(responseBody => {
+        let result = JSON.parse(responseBody);
+        if (result.success) {
+          this.props.history.push("/user/" + result.username);
+          console.log(result);
+        } else {
+          // if username already exists
+          let correctUN = Object.assign({}, this.state.form, { username: "" });
+          this.setState({ form: correctUN });
+          alert(result.message);
+        }
       })
-        .then(response => response.text())
-        .then(responseBody => {
-          let result = JSON.parse(responseBody);
-          if(result.success) {
-            this.props.history.push('/user/' + result.username);
-            console.log(result);
-          } else {
-            // if username already exists
-            let correctUN = Object.assign({}, this.state.form, {username: ''});
-            this.setState({form : correctUN});
-            alert(result.message);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          alert('there was en error, try again.');
-        })
+      .catch(err => {
+        console.log(err);
+        alert("there was en error, try again.");
+      });
   }
 
   handleChange(evt) {
     //console.log(evt);
-    let change = Object.assign({}, this.state.form, {[evt.target.name]: evt.target.value});
-    this.setState({form: change, formCompleted: this.isCompleted()});
+    let change = Object.assign({}, this.state.form, {
+      [evt.target.name]: evt.target.value
+    });
+    this.setState({ form: change, formCompleted: this.isCompleted() });
   }
 
   render() {
@@ -138,7 +144,12 @@ class SignupComponent extends Component {
             />
           </div>
           <div className="signup__form__field">
-            <input type="submit" onClick={this.submitForm} className="signup__form__submit" disabled={!this.state.formCompleted} />
+            <input
+              type="submit"
+              onClick={this.submitForm}
+              className="signup__form__submit"
+              disabled={!this.state.formCompleted}
+            />
           </div>
         </form>
       </div>
