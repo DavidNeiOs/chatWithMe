@@ -1,12 +1,25 @@
 .chat-header {
-  height: 6vh;
+  height: 8vh;
   padding: 2vh 0;
-  background-color: #d46363;
+  background-color: #dd4848;
 }
 .chat-header > div {
   width: 70%;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
-  padding: 0 1vw;
+  align-items: center;
+  line-height: 1.5;
+}
+.chat-header__greeting {
+  font-size: 1.2rem;
+}
+.chat-header__button {
+  padding: 4px;
+  background-color: #0e15dd;
+  color: whitesmoke;
+  font-size: 1.05rem;
+}
+.chat-header__button:hover{
+  cursor: pointer;
 }

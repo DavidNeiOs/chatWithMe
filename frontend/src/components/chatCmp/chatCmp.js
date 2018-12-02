@@ -85,28 +85,31 @@ class ChatCmp extends Component {
 
   render() {
     return (
-      <main className="chat-cmp">
-        <section className="chat-background">
-          <div className="chat-container">
-            <div id="chat-messages">
-              {this.state.messages.map((msg, idx) => {
-                return this.renderMessages(msg, idx);
-              })}
-            </div>
-            <form onSubmit={this.handleSubmit} className="chat-form">
-              <input
-                id="m"
-                autoComplete="off"
-                className="chat-form__input"
-                name="message"
-                onChange={this.handleChange}
-                value={this.state.form.message}
-              />
-              <input type="submit" className="chat-form__button" value="send" />
-            </form>
+      <section className="chat-background">
+        <div className="chat-container">
+          <div id="chat-messages">
+            {this.state.messages.map((msg, idx) => {
+              return this.renderMessages(msg, idx);
+            })}
           </div>
-        </section>
-      </main>
+          <form onSubmit={this.handleSubmit} className="chat-form">
+            <input
+              id="m"
+              autoComplete="off"
+              className="chat-form__input"
+              name="message"
+              onChange={this.handleChange}
+              value={this.state.form.message}
+            />
+            <input
+              type="submit"
+              className="chat-form__button"
+              value="Send"
+              disabled={this.state.form.message === ""}
+            />
+          </form>
+        </div>
+      </section>
     );
   }
 }

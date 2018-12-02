@@ -1,9 +1,10 @@
 .admin-main {
-  display: grid;
-  grid-template-columns: auto auto;
-  height: calc(100% - 6vh);
+  display: flex;
+  height: calc(100% - 8vh);
 }
-
+.admin-main > * {
+  flex: 1;
+}
 .user-container {
   border: 1px solid black;
   padding: 1rem;
